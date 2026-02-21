@@ -10,7 +10,12 @@ interface Props {
 
 export function CategoryFilter({ selected, onSelect }: Props) {
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.container}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.container}
+      contentContainerStyle={styles.content}
+    >
       <Chip
         selected={selected === 'all'}
         onPress={() => onSelect('all')}
@@ -38,8 +43,12 @@ export function CategoryFilter({ selected, onSelect }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
+    flexGrow: 0,
     paddingVertical: 8,
+  },
+  content: {
+    paddingHorizontal: 16,
+    alignItems: 'center',
   },
   chip: {
     marginRight: 8,
