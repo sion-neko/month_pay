@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
-import { Button, Text } from 'react-native-paper';
+import { View, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import { FAB, Text } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useExpenseContext } from '../src/contexts/ExpenseContext';
-import { SummaryCard, CategoryPieChart } from '../src/components';
+import { SummaryCard, CategoryPieChart, ExpenseCard, CategoryFilter } from '../src/components';
 import { calculateTotals, calculateCategorySummaries } from '../src/utils/calculation';
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { state } = useExpenseContext();
+  const { state, filteredExpenses, setFilter } = useExpenseContext();
   const [displayMode, setDisplayMode] = useState<'monthly' | 'annual'>('monthly');
 
   if (state.isLoading) {
@@ -22,8 +22,8 @@ export default function DashboardScreen() {
   const totals = calculateTotals(state.expenses);
   const categorySummaries = calculateCategorySummaries(state.expenses);
 
-  return (
-    <ScrollView style={styles.container}>
+  const ListHeader = () => (
+    <View>
       <SummaryCard
         monthlyTotal={totals.monthly}
         annualTotal={totals.annual}
@@ -31,43 +31,49 @@ export default function DashboardScreen() {
         onModeChange={setDisplayMode}
       />
 
-      {state.expenses.length > 0 ? (
+      {state.expenses.length > 0 && (
         <>
           <Text variant="titleMedium" style={styles.sectionTitle}>
             カテゴリ別内訳
           </Text>
           <CategoryPieChart data={categorySummaries} displayMode={displayMode} />
-        </>
-      ) : (
-        <View style={styles.emptyState}>
-          <Text variant="bodyLarge" style={styles.emptyText}>
-            固定費が登録されていません
-          </Text>
-          <Text variant="bodySmall" style={styles.emptySubText}>
-            「固定費を追加」ボタンから登録してください
-          </Text>
-        </View>
-      )}
 
-      <View style={styles.buttons}>
-        <Button
-          mode="outlined"
-          onPress={() => router.push('/expenses')}
-          style={styles.button}
-          icon="format-list-bulleted"
-        >
-          一覧を見る
-        </Button>
-        <Button
-          mode="contained"
-          onPress={() => router.push('/expenses/new')}
-          style={styles.button}
-          icon="plus"
-        >
-          固定費を追加
-        </Button>
-      </View>
-    </ScrollView>
+          <Text variant="titleMedium" style={styles.sectionTitle}>
+            固定費一覧
+          </Text>
+          <CategoryFilter selected={state.filterCategory} onSelect={setFilter} />
+        </>
+      )}
+    </View>
+  );
+
+  const EmptyList = () => (
+    <View style={styles.emptyState}>
+      <Text variant="bodyLarge" style={styles.emptyText}>
+        固定費が登録されていません
+      </Text>
+      <Text variant="bodySmall" style={styles.emptySubText}>
+        右下の＋ボタンから登録してください
+      </Text>
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <FlatList
+        data={filteredExpenses}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <ExpenseCard expense={item} />}
+        ListHeaderComponent={ListHeader}
+        ListEmptyComponent={state.expenses.length === 0 ? EmptyList : undefined}
+        contentContainerStyle={styles.list}
+      />
+      <FAB
+        icon="plus"
+        style={styles.fab}
+        onPress={() => router.push('/expenses/new')}
+      />
+    </View>
   );
 }
 
@@ -80,6 +86,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  list: {
+    paddingBottom: 100,
   },
   sectionTitle: {
     marginHorizontal: 16,
@@ -97,14 +106,10 @@ const styles = StyleSheet.create({
     color: '#999',
     marginTop: 8,
   },
-  buttons: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
-    padding: 16,
-    marginBottom: 32,
-  },
-  button: {
-    flex: 1,
+  fab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    bottom: 0,
   },
 });

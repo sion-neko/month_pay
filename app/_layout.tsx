@@ -14,7 +14,6 @@ export default function RootLayout() {
           }}
         >
           <Stack.Screen name="index" options={{ title: '固定費管理' }} />
-          <Stack.Screen name="expenses/index" options={{ title: '固定費一覧' }} />
           <Stack.Screen name="expenses/new" options={{ title: '固定費を追加' }} />
           <Stack.Screen name="expenses/[id]" options={{ title: '固定費詳細' }} />
         </Stack>
