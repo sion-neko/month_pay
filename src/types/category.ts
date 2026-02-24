@@ -7,7 +7,7 @@ export type PresetCategoryType =
   | 'subscription' // サブスク
   | 'insurance' // 保険
   | 'beauty' // 美容
-  | 'transportation' // 交通
+  | 'investment' // 投資
   | 'other'; // その他
 
 /**
@@ -86,10 +86,10 @@ export const PRESET_CATEGORIES: Record<PresetCategoryType, Category> = {
     icon: 'content-cut',
     color: '#9966FF',
   },
-  transportation: {
-    type: 'transportation',
-    label: '交通',
-    icon: 'train',
+  investment: {
+    type: 'investment',
+    label: '投資',
+    icon: 'chart-line',
     color: '#FF9F40',
   },
   other: {
