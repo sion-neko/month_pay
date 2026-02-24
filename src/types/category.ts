@@ -1,7 +1,7 @@
 /**
- * カテゴリの種類
+ * プリセットカテゴリの種類
  */
-export type CategoryType =
+export type PresetCategoryType =
   | 'housing' // 住居
   | 'communication' // 通信
   | 'subscription' // サブスク
@@ -11,6 +11,11 @@ export type CategoryType =
   | 'other'; // その他
 
 /**
+ * カテゴリの種類（プリセット + カスタム）
+ */
+export type CategoryType = PresetCategoryType | string;
+
+/**
  * カテゴリ情報
  */
 export interface Category {
@@ -18,12 +23,39 @@ export interface Category {
   label: string;
   icon: string;
   color: string;
+  isCustom?: boolean;
+  order?: number;
 }
 
 /**
- * カテゴリ定義マスター
+ * カスタムカテゴリの入力
  */
-export const CATEGORIES: Record<CategoryType, Category> = {
+export type CustomCategoryInput = Omit<Category, 'type' | 'isCustom'>;
+
+/**
+ * 選択可能な色
+ */
+export const CATEGORY_COLORS = [
+  '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+  '#9966FF', '#FF9F40', '#C9CBCF', '#E91E63',
+  '#2196F3', '#4CAF50', '#FF5722', '#795548',
+];
+
+/**
+ * 選択可能なアイコン
+ */
+export const CATEGORY_ICONS = [
+  'home', 'cellphone', 'play-circle', 'shield-check',
+  'content-cut', 'train', 'car', 'food', 'medical-bag',
+  'school', 'basketball', 'music', 'music-note', 'book-open-variant',
+  'shopping', 'gift', 'heart', 'star', 'lightning-bolt',
+  'dots-horizontal',
+];
+
+/**
+ * プリセットカテゴリ定義マスター
+ */
+export const PRESET_CATEGORIES: Record<PresetCategoryType, Category> = {
   housing: {
     type: 'housing',
     label: '住居',
@@ -69,6 +101,12 @@ export const CATEGORIES: Record<CategoryType, Category> = {
 };
 
 /**
- * カテゴリ一覧（配列）
+ * プリセットカテゴリ一覧（配列）
  */
-export const CATEGORY_LIST = Object.values(CATEGORIES);
+export const PRESET_CATEGORY_LIST = Object.values(PRESET_CATEGORIES);
+
+/**
+ * 後方互換性のためのエイリアス
+ */
+export const CATEGORIES = PRESET_CATEGORIES;
+export const CATEGORY_LIST = PRESET_CATEGORY_LIST;

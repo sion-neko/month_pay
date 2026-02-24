@@ -3,10 +3,10 @@ import { StyleSheet } from 'react-native';
 import { Card, Text, Chip } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { Expense } from '../../types/expense';
-import { CATEGORIES } from '../../types/category';
 import { FREQUENCY_LABELS } from '../../types/frequency';
 import { formatCurrency } from '../../utils/format';
 import { calculateConvertedAmount } from '../../utils/calculation';
+import { useCategoryContext } from '../../contexts/CategoryContext';
 
 interface Props {
   expense: Expense;
@@ -14,7 +14,8 @@ interface Props {
 
 export function ExpenseCard({ expense }: Props) {
   const router = useRouter();
-  const category = CATEGORIES[expense.category];
+  const { getCategoryByType } = useCategoryContext();
+  const category = getCategoryByType(expense.category) ?? { label: 'その他', icon: 'dots-horizontal', color: '#C9CBCF' };
   const converted = calculateConvertedAmount(expense);
   const isMonthly = expense.frequency.type === 'monthly';
 

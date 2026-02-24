@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { TextInput, Button, HelperText, Text, Chip } from 'react-native-paper';
 import { ExpenseInput } from '../../types/expense';
-import { CategoryType, CATEGORY_LIST } from '../../types/category';
+import { CategoryType } from '../../types/category';
 import { FrequencyType, FREQUENCY_OPTIONS } from '../../types/frequency';
 import { validateExpenseInput, hasErrors, ValidationErrors } from '../../utils/validation';
+import { useCategoryContext } from '../../contexts/CategoryContext';
 
 interface Props {
   initialValues?: Partial<ExpenseInput>;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function ExpenseForm({ initialValues, onSubmit, onCancel, submitLabel = '保存' }: Props) {
+  const { allCategories } = useCategoryContext();
   const [name, setName] = useState(initialValues?.name ?? '');
   const [amount, setAmount] = useState(initialValues?.amount?.toString() ?? '');
   const [frequencyType, setFrequencyType] = useState<FrequencyType>(initialValues?.frequency?.type ?? 'monthly');
@@ -104,7 +106,7 @@ export function ExpenseForm({ initialValues, onSubmit, onCancel, submitLabel = '
         カテゴリ
       </Text>
       <View style={styles.categoryContainer}>
-        {CATEGORY_LIST.map((cat) => (
+        {allCategories.map((cat) => (
           <Chip
             key={cat.type}
             selected={category === cat.type}

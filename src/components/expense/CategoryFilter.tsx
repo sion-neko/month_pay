@@ -1,7 +1,8 @@
 import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { Chip } from 'react-native-paper';
-import { CategoryType, CATEGORY_LIST } from '../../types/category';
+import { CategoryType } from '../../types/category';
+import { useCategoryContext } from '../../contexts/CategoryContext';
 
 interface Props {
   selected: CategoryType | 'all';
@@ -9,6 +10,8 @@ interface Props {
 }
 
 export function CategoryFilter({ selected, onSelect }: Props) {
+  const { allCategories } = useCategoryContext();
+
   return (
     <ScrollView
       horizontal
@@ -24,7 +27,7 @@ export function CategoryFilter({ selected, onSelect }: Props) {
       >
         すべて
       </Chip>
-      {CATEGORY_LIST.map((cat) => (
+      {allCategories.map((cat) => (
         <Chip
           key={cat.type}
           selected={selected === cat.type}

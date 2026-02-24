@@ -1,6 +1,6 @@
 import { Expense, ConvertedAmount, CategorySummary } from '../types/expense';
 import { FrequencyType, FREQUENCY_MONTHS } from '../types/frequency';
-import { CategoryType, CATEGORIES } from '../types/category';
+import { CategoryType } from '../types/category';
 
 /**
  * 支払い頻度から月数を取得
@@ -48,9 +48,14 @@ export function calculateTotals(expenses: Expense[]): ConvertedAmount {
  */
 export function calculateCategorySummaries(expenses: Expense[]): CategorySummary[] {
   const totals = calculateTotals(expenses);
-  const categoryGroups = Object.keys(CATEGORIES) as CategoryType[];
 
-  return categoryGroups.map((category) => {
+  // 固定費に含まれるすべてのカテゴリを抽出（プリセット + カスタム）
+  const categorySet = new Set<CategoryType>();
+  for (const expense of expenses) {
+    categorySet.add(expense.category);
+  }
+
+  return Array.from(categorySet).map((category) => {
     const categoryExpenses = expenses.filter((e) => e.category === category);
     const categoryTotals = calculateTotals(categoryExpenses);
 

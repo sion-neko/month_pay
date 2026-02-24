@@ -3,8 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Path, G, Circle } from 'react-native-svg';
 import { CategorySummary } from '../../types/expense';
-import { CATEGORIES } from '../../types/category';
 import { formatCurrency } from '../../utils/format';
+import { useCategoryContext } from '../../contexts/CategoryContext';
 
 interface Props {
   data: CategorySummary[];
@@ -32,6 +32,8 @@ function createArcPath(cx: number, cy: number, r: number, startAngle: number, en
 }
 
 export function CategoryPieChart({ data, displayMode }: Props) {
+  const { getCategoryByType } = useCategoryContext();
+
   const filteredData = data.filter((item) =>
     displayMode === 'monthly' ? item.totalMonthly > 0 : item.totalAnnual > 0
   );
@@ -59,8 +61,9 @@ export function CategoryPieChart({ data, displayMode }: Props) {
     const value = displayMode === 'monthly' ? item.totalMonthly : item.totalAnnual;
     const sliceAngle = (value / total) * 360;
     const path = createArcPath(cx, cy, radius, currentAngle, currentAngle + sliceAngle);
-    const color = CATEGORIES[item.category].color;
-    const label = CATEGORIES[item.category].label;
+    const category = getCategoryByType(item.category);
+    const color = category?.color ?? '#C9CBCF';
+    const label = category?.label ?? 'その他';
     currentAngle += sliceAngle;
     return { path, color, label, value };
   });

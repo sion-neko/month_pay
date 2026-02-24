@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { View, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { FAB, Text } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useExpenseContext } from '../src/contexts/ExpenseContext';
 import { SummaryCard, CategoryPieChart, ExpenseCard, CategoryFilter } from '../src/components';
@@ -38,9 +39,13 @@ export default function DashboardScreen() {
           </Text>
           <CategoryPieChart data={categorySummaries} displayMode={displayMode} />
 
-          <Text variant="titleMedium" style={styles.sectionTitle}>
-            固定費一覧
-          </Text>
+          <View style={styles.sectionHeader}>
+            <Text variant="titleMedium">固定費一覧</Text>
+            <TouchableOpacity onPress={() => router.push('/categories')} style={styles.settingsButton}>
+              <MaterialCommunityIcons name="cog" size={20} color="#666" />
+              <Text style={styles.settingsText}>カテゴリ管理</Text>
+            </TouchableOpacity>
+          </View>
           <CategoryFilter selected={state.filterCategory} onSelect={setFilter} />
         </>
       )}
@@ -105,6 +110,23 @@ const styles = StyleSheet.create({
   emptySubText: {
     color: '#999',
     marginTop: 8,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  settingsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  settingsText: {
+    color: '#666',
+    fontSize: 12,
   },
   fab: {
     position: 'absolute',
