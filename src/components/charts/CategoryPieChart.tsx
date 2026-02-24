@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
-import Svg, { Path, G } from 'react-native-svg';
+import Svg, { Path, G, Circle } from 'react-native-svg';
 import { CategorySummary } from '../../types/expense';
 import { CATEGORIES } from '../../types/category';
 import { formatCurrency } from '../../utils/format';
@@ -69,9 +69,13 @@ export function CategoryPieChart({ data, displayMode }: Props) {
     <View style={styles.container}>
       <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <G>
-          {slices.map((slice, i) => (
-            <Path key={i} d={slice.path} fill={slice.color} />
-          ))}
+          {slices.length === 1 ? (
+            <Circle cx={cx} cy={cy} r={radius} fill={slices[0].color} />
+          ) : (
+            slices.map((slice, i) => (
+              <Path key={i} d={slice.path} fill={slice.color} />
+            ))
+          )}
         </G>
       </Svg>
       <View style={styles.legend}>
