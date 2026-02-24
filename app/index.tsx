@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import { FAB, Text } from 'react-native-paper';
 import { useRouter } from 'expo-router';
@@ -11,6 +11,9 @@ export default function DashboardScreen() {
   const { state, filteredExpenses, setFilter } = useExpenseContext();
   const [displayMode, setDisplayMode] = useState<'monthly' | 'annual'>('monthly');
 
+  const totals = useMemo(() => calculateTotals(state.expenses), [state.expenses]);
+  const categorySummaries = useMemo(() => calculateCategorySummaries(state.expenses), [state.expenses]);
+
   if (state.isLoading) {
     return (
       <View style={styles.loading}>
@@ -19,10 +22,7 @@ export default function DashboardScreen() {
     );
   }
 
-  const totals = calculateTotals(state.expenses);
-  const categorySummaries = calculateCategorySummaries(state.expenses);
-
-  const ListHeader = () => (
+  const ListHeader = (
     <View>
       <SummaryCard
         monthlyTotal={totals.monthly}
