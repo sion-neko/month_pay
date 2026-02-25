@@ -47,7 +47,6 @@ function CategoryCard({ category, onEdit, onMoveUp, onMoveDown, isFirst, isLast 
             disabled={isLast}
             iconColor={isLast ? '#ccc' : '#666'}
           />
-          <IconButton icon="pencil-outline" size={20} onPress={onEdit} iconColor="#666" />
         </View>
       </Card.Content>
     </Card>
