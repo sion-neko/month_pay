@@ -20,6 +20,7 @@ export default function RootLayout() {
             <Stack.Screen name="expenses/[id]" options={{ title: '固定費詳細' }} />
             <Stack.Screen name="categories/index" options={{ title: 'カテゴリ管理' }} />
             <Stack.Screen name="categories/new" options={{ title: 'カテゴリを追加' }} />
+            <Stack.Screen name="categories/[type]" options={{ title: 'カテゴリを編集' }} />
           </Stack>
         </ExpenseProvider>
       </CategoryProvider>

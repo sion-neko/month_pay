@@ -3,9 +3,10 @@ import { View, ScrollView, StyleSheet, Alert, ActivityIndicator } from 'react-na
 import { Card, Text, Button, Divider } from 'react-native-paper';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useExpenseContext } from '../../src/contexts/ExpenseContext';
+import { useCategoryContext } from '../../src/contexts/CategoryContext';
 import { ExpenseForm } from '../../src/components';
 import { ExpenseInput } from '../../src/types/expense';
-import { CATEGORIES } from '../../src/types/category';
+import { PRESET_CATEGORIES } from '../../src/types/category';
 import { FREQUENCY_LABELS } from '../../src/types/frequency';
 import { formatCurrency } from '../../src/utils/format';
 import { calculateConvertedAmount } from '../../src/utils/calculation';
@@ -14,6 +15,7 @@ export default function ExpenseDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getExpenseById, updateExpense, deleteExpense } = useExpenseContext();
+  const { getCategoryByType } = useCategoryContext();
   const [isEditing, setIsEditing] = useState(false);
 
   const expense = getExpenseById(id);
@@ -26,7 +28,7 @@ export default function ExpenseDetailScreen() {
     );
   }
 
-  const category = CATEGORIES[expense.category];
+  const category = getCategoryByType(expense.category) ?? PRESET_CATEGORIES.other;
   const converted = calculateConvertedAmount(expense);
 
   const handleUpdate = async (data: ExpenseInput) => {

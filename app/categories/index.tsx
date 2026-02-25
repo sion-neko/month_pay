@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, FlatList, StyleSheet, Alert } from 'react-native';
+import { View, FlatList, StyleSheet } from 'react-native';
 import { FAB, Text, Card, IconButton } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -8,16 +8,16 @@ import { Category } from '../../src/types/category';
 
 interface CategoryCardProps {
   category: Category;
-  onDelete?: () => void;
+  onEdit?: () => void;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   isFirst?: boolean;
   isLast?: boolean;
 }
 
-function CategoryCard({ category, onDelete, onMoveUp, onMoveDown, isFirst, isLast }: CategoryCardProps) {
+function CategoryCard({ category, onEdit, onMoveUp, onMoveDown, isFirst, isLast }: CategoryCardProps) {
   return (
-    <Card style={styles.card}>
+    <Card style={styles.card} onPress={onEdit}>
       <Card.Content style={styles.cardContent}>
         <View style={[styles.iconContainer, { backgroundColor: category.color }]}>
           <MaterialCommunityIcons
@@ -47,9 +47,7 @@ function CategoryCard({ category, onDelete, onMoveUp, onMoveDown, isFirst, isLas
             disabled={isLast}
             iconColor={isLast ? '#ccc' : '#666'}
           />
-          {category.isCustom && onDelete && (
-            <IconButton icon="delete-outline" size={20} onPress={onDelete} />
-          )}
+          <IconButton icon="pencil-outline" size={20} onPress={onEdit} iconColor="#666" />
         </View>
       </Card.Content>
     </Card>
@@ -58,22 +56,7 @@ function CategoryCard({ category, onDelete, onMoveUp, onMoveDown, isFirst, isLas
 
 export default function CategoryListScreen() {
   const router = useRouter();
-  const { allCategories, deleteCategory, moveCategory } = useCategoryContext();
-
-  const handleDelete = (category: Category) => {
-    Alert.alert(
-      '削除確認',
-      `「${category.label}」を削除しますか？`,
-      [
-        { text: 'キャンセル', style: 'cancel' },
-        {
-          text: '削除',
-          style: 'destructive',
-          onPress: () => deleteCategory(category.type),
-        },
-      ]
-    );
-  };
+  const { allCategories, moveCategory } = useCategoryContext();
 
   const ListHeader = () => (
     <Text variant="titleMedium" style={styles.sectionTitle}>
@@ -89,7 +72,7 @@ export default function CategoryListScreen() {
         renderItem={({ item, index }) => (
           <CategoryCard
             category={item}
-            onDelete={item.isCustom ? () => handleDelete(item) : undefined}
+            onEdit={() => router.push(`/categories/${item.type}`)}
             onMoveUp={() => moveCategory(item.type, 'up')}
             onMoveDown={() => moveCategory(item.type, 'down')}
             isFirst={index === 0}
