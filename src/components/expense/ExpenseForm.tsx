@@ -3,10 +3,10 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { TextInput, Button, HelperText, Text, Chip } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { ExpenseInput } from '../../types/expense';
-import { CategoryType } from '../../types/category';
+import { PriorityType, PRIORITY_LIST } from '../../types/priority';
 import { FrequencyType, FREQUENCY_OPTIONS } from '../../types/frequency';
 import { validateExpenseInput, hasErrors, ValidationErrors } from '../../utils/validation';
-import { useCategoryContext } from '../../contexts/CategoryContext';
+import { useTagContext } from '../../contexts/TagContext';
 
 interface Props {
   initialValues?: Partial<ExpenseInput>;
@@ -17,14 +17,21 @@ interface Props {
 
 export function ExpenseForm({ initialValues, onSubmit, onCancel, submitLabel = '保存' }: Props) {
   const router = useRouter();
-  const { allCategories } = useCategoryContext();
+  const { allTags } = useTagContext();
   const [name, setName] = useState(initialValues?.name ?? '');
   const [amount, setAmount] = useState(initialValues?.amount?.toString() ?? '');
   const [frequencyType, setFrequencyType] = useState<FrequencyType>(initialValues?.frequency?.type ?? 'monthly');
   const [customMonths, setCustomMonths] = useState(initialValues?.frequency?.customMonths?.toString() ?? '');
-  const [category, setCategory] = useState<CategoryType>(initialValues?.category ?? 'other');
+  const [priority, setPriority] = useState<PriorityType>(initialValues?.priority ?? 'semi-essential');
+  const [selectedTags, setSelectedTags] = useState<string[]>(initialValues?.tags ?? []);
   const [memo, setMemo] = useState(initialValues?.memo ?? '');
   const [errors, setErrors] = useState<ValidationErrors>({});
+
+  const toggleTag = (tagId: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
+    );
+  };
 
   const handleSubmit = () => {
     const data: ExpenseInput = {
@@ -34,7 +41,8 @@ export function ExpenseForm({ initialValues, onSubmit, onCancel, submitLabel = '
         type: frequencyType,
         ...(frequencyType === 'custom' && { customMonths: parseInt(customMonths, 10) }),
       },
-      category,
+      priority,
+      tags: selectedTags,
       memo: memo.trim() || undefined,
     };
 
@@ -74,7 +82,7 @@ export function ExpenseForm({ initialValues, onSubmit, onCancel, submitLabel = '
       <Text variant="titleSmall" style={styles.sectionTitle}>
         支払い頻度
       </Text>
-      <View style={styles.frequencyContainer}>
+      <View style={styles.chipContainer}>
         {FREQUENCY_OPTIONS.map((option) => (
           <Chip
             key={option.value}
@@ -105,26 +113,44 @@ export function ExpenseForm({ initialValues, onSubmit, onCancel, submitLabel = '
       )}
 
       <Text variant="titleSmall" style={styles.sectionTitle}>
-        カテゴリ
+        重要度
       </Text>
-      <View style={styles.categoryContainer}>
-        {allCategories.map((cat) => (
+      <View style={styles.chipContainer}>
+        {PRIORITY_LIST.map((p) => (
           <Chip
-            key={cat.type}
-            selected={category === cat.type}
-            onPress={() => setCategory(cat.type)}
-            style={[styles.chip, category === cat.type && { backgroundColor: cat.color }]}
-            textStyle={category === cat.type ? { color: '#fff' } : undefined}
-            icon={cat.icon}
+            key={p.type}
+            selected={priority === p.type}
+            onPress={() => setPriority(p.type)}
+            style={[styles.chip, priority === p.type && { backgroundColor: p.color }]}
+            textStyle={priority === p.type ? { color: '#fff' } : undefined}
+            icon={p.icon}
             mode="outlined"
           >
-            {cat.label}
+            {p.label}
+          </Chip>
+        ))}
+      </View>
+
+      <Text variant="titleSmall" style={styles.sectionTitle}>
+        タグ（任意）
+      </Text>
+      <View style={styles.chipContainer}>
+        {allTags.map((tag) => (
+          <Chip
+            key={tag.id}
+            selected={selectedTags.includes(tag.id)}
+            onPress={() => toggleTag(tag.id)}
+            style={[styles.chip, selectedTags.includes(tag.id) && { backgroundColor: tag.color }]}
+            textStyle={selectedTags.includes(tag.id) ? { color: '#fff' } : undefined}
+            mode="outlined"
+          >
+            {tag.label}
           </Chip>
         ))}
         <Chip
           icon="plus"
-          onPress={() => router.push('/categories/new')}
-          style={styles.addCategoryChip}
+          onPress={() => router.push('/tags/new')}
+          style={styles.addChip}
           mode="outlined"
         >
           追加
@@ -166,13 +192,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 8,
   },
-  frequencyContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 8,
-  },
-  categoryContainer: {
+  chipContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
@@ -181,7 +201,7 @@ const styles = StyleSheet.create({
   chip: {
     marginBottom: 4,
   },
-  addCategoryChip: {
+  addChip: {
     marginBottom: 4,
     borderStyle: 'dashed',
   },

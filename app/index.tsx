@@ -4,8 +4,8 @@ import { FAB, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useExpenseContext } from '../src/contexts/ExpenseContext';
-import { SummaryCard, CategoryPieChart, ExpenseCard, CategoryFilter } from '../src/components';
-import { calculateTotals, calculateCategorySummaries } from '../src/utils/calculation';
+import { SummaryCard, PriorityPieChart, ExpenseCard, PriorityFilter, TagFilter } from '../src/components';
+import { calculateTotals, calculatePrioritySummaries } from '../src/utils/calculation';
 
 export default function DashboardScreen() {
   const router = useRouter();
@@ -13,7 +13,7 @@ export default function DashboardScreen() {
   const [displayMode, setDisplayMode] = useState<'monthly' | 'annual'>('monthly');
 
   const totals = useMemo(() => calculateTotals(state.expenses), [state.expenses]);
-  const categorySummaries = useMemo(() => calculateCategorySummaries(state.expenses), [state.expenses]);
+  const prioritySummaries = useMemo(() => calculatePrioritySummaries(state.expenses), [state.expenses]);
 
   if (state.isLoading) {
     return (
@@ -35,18 +35,27 @@ export default function DashboardScreen() {
       {state.expenses.length > 0 && (
         <>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            カテゴリ別内訳
+            重要度別内訳
           </Text>
-          <CategoryPieChart data={categorySummaries} displayMode={displayMode} />
+          <PriorityPieChart data={prioritySummaries} displayMode={displayMode} />
 
           <View style={styles.sectionHeader}>
             <Text variant="titleMedium">固定費一覧</Text>
-            <TouchableOpacity onPress={() => router.push('/categories')} style={styles.settingsButton}>
-              <MaterialCommunityIcons name="cog" size={20} color="#666" />
-              <Text style={styles.settingsText}>カテゴリ管理</Text>
+            <TouchableOpacity onPress={() => router.push('/tags')} style={styles.settingsButton}>
+              <MaterialCommunityIcons name="tag-multiple" size={20} color="#666" />
+              <Text style={styles.settingsText}>タグ管理</Text>
             </TouchableOpacity>
           </View>
-          <CategoryFilter selected={state.filterCategory} onSelect={setFilter} />
+          <Text variant="bodySmall" style={styles.filterLabel}>重要度で絞り込み</Text>
+          <PriorityFilter
+            selected={state.filter.priority}
+            onSelect={(priority) => setFilter({ priority })}
+          />
+          <Text variant="bodySmall" style={styles.filterLabel}>タグで絞り込み</Text>
+          <TagFilter
+            selected={state.filter.tagId}
+            onSelect={(tagId) => setFilter({ tagId })}
+          />
         </>
       )}
     </View>
@@ -127,6 +136,12 @@ const styles = StyleSheet.create({
   settingsText: {
     color: '#666',
     fontSize: 12,
+  },
+  filterLabel: {
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 4,
+    color: '#666',
   },
   fab: {
     position: 'absolute',

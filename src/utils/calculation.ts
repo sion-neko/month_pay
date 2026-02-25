@@ -1,6 +1,6 @@
-import { Expense, ConvertedAmount, CategorySummary } from '../types/expense';
+import { Expense, ConvertedAmount, PrioritySummary, TagSummary } from '../types/expense';
 import { FrequencyType, FREQUENCY_MONTHS } from '../types/frequency';
-import { CategoryType } from '../types/category';
+import { PriorityType, PRIORITY_LIST } from '../types/priority';
 
 /**
  * 支払い頻度から月数を取得
@@ -44,27 +44,46 @@ export function calculateTotals(expenses: Expense[]): ConvertedAmount {
 }
 
 /**
- * カテゴリ別に集計
+ * 重要度別に集計
  */
-export function calculateCategorySummaries(expenses: Expense[]): CategorySummary[] {
+export function calculatePrioritySummaries(expenses: Expense[]): PrioritySummary[] {
   const totals = calculateTotals(expenses);
 
-  // 固定費に含まれるすべてのカテゴリを抽出（プリセット + カスタム）
-  const categorySet = new Set<CategoryType>();
-  for (const expense of expenses) {
-    categorySet.add(expense.category);
-  }
-
-  return Array.from(categorySet).map((category) => {
-    const categoryExpenses = expenses.filter((e) => e.category === category);
-    const categoryTotals = calculateTotals(categoryExpenses);
+  return PRIORITY_LIST.map((p) => {
+    const priorityExpenses = expenses.filter((e) => e.priority === p.type);
+    const priorityTotals = calculateTotals(priorityExpenses);
 
     return {
-      category,
-      totalMonthly: categoryTotals.monthly,
-      totalAnnual: categoryTotals.annual,
-      count: categoryExpenses.length,
-      percentage: totals.monthly > 0 ? Math.round((categoryTotals.monthly / totals.monthly) * 100) : 0,
+      priority: p.type as PriorityType,
+      totalMonthly: priorityTotals.monthly,
+      totalAnnual: priorityTotals.annual,
+      count: priorityExpenses.length,
+      percentage: totals.monthly > 0 ? Math.round((priorityTotals.monthly / totals.monthly) * 100) : 0,
+    };
+  }).filter((summary) => summary.count > 0);
+}
+
+/**
+ * タグ別に集計
+ */
+export function calculateTagSummaries(expenses: Expense[]): TagSummary[] {
+  // 使用されているタグを抽出
+  const tagIds = new Set<string>();
+  for (const expense of expenses) {
+    for (const tagId of expense.tags) {
+      tagIds.add(tagId);
+    }
+  }
+
+  return Array.from(tagIds).map((tagId) => {
+    const tagExpenses = expenses.filter((e) => e.tags.includes(tagId));
+    const tagTotals = calculateTotals(tagExpenses);
+
+    return {
+      tagId,
+      totalMonthly: tagTotals.monthly,
+      totalAnnual: tagTotals.annual,
+      count: tagExpenses.length,
     };
   });
 }

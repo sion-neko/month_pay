@@ -1,15 +1,21 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { Expense, ExpenseInput } from '../types/expense';
-import { CategoryType } from '../types/category';
+import { PriorityType } from '../types/priority';
 import { loadExpenses, saveExpenses } from '../utils/storage';
 import { generateId } from '../utils/format';
+
+// フィルター型
+interface ExpenseFilter {
+  priority: PriorityType | 'all';
+  tagId: string | 'all';
+}
 
 // State
 interface ExpenseState {
   expenses: Expense[];
   isLoading: boolean;
   error: string | null;
-  filterCategory: CategoryType | 'all';
+  filter: ExpenseFilter;
 }
 
 // Action
@@ -19,14 +25,17 @@ type ExpenseAction =
   | { type: 'ADD_EXPENSE'; payload: Expense }
   | { type: 'UPDATE_EXPENSE'; payload: Expense }
   | { type: 'DELETE_EXPENSE'; payload: string }
-  | { type: 'SET_FILTER'; payload: CategoryType | 'all' }
+  | { type: 'SET_FILTER'; payload: Partial<ExpenseFilter> }
   | { type: 'SET_ERROR'; payload: string | null };
 
 const initialState: ExpenseState = {
   expenses: [],
   isLoading: true,
   error: null,
-  filterCategory: 'all',
+  filter: {
+    priority: 'all',
+    tagId: 'all',
+  },
 };
 
 function expenseReducer(state: ExpenseState, action: ExpenseAction): ExpenseState {
@@ -48,12 +57,69 @@ function expenseReducer(state: ExpenseState, action: ExpenseAction): ExpenseStat
         expenses: state.expenses.filter((e) => e.id !== action.payload),
       };
     case 'SET_FILTER':
-      return { ...state, filterCategory: action.payload };
+      return { ...state, filter: { ...state.filter, ...action.payload } };
     case 'SET_ERROR':
       return { ...state, error: action.payload };
     default:
       return state;
   }
+}
+
+// 旧データからのマイグレーション
+interface LegacyExpense {
+  id: string;
+  name: string;
+  amount: number;
+  frequency: { type: string; customMonths?: number };
+  category?: string;
+  priority?: PriorityType;
+  tags?: string[];
+  memo?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function migrateExpense(legacy: LegacyExpense): Expense {
+  // 既に新形式の場合はそのまま返す
+  if (legacy.priority && legacy.tags) {
+    return legacy as Expense;
+  }
+
+  // 旧カテゴリから重要度とタグへのマッピング
+  const categoryToPriority: Record<string, PriorityType> = {
+    housing: 'essential',
+    communication: 'semi-essential',
+    subscription: 'discretionary',
+    insurance: 'essential',
+    beauty: 'discretionary',
+    investment: 'semi-essential',
+    other: 'semi-essential',
+  };
+
+  const categoryToTag: Record<string, string> = {
+    housing: 'housing',
+    communication: 'communication',
+    subscription: 'subscription',
+    insurance: 'insurance',
+    utility: 'utility',
+  };
+
+  const oldCategory = legacy.category || 'other';
+  const priority = categoryToPriority[oldCategory] || 'semi-essential';
+  const tagId = categoryToTag[oldCategory];
+  const tags = tagId ? [tagId] : [];
+
+  return {
+    id: legacy.id,
+    name: legacy.name,
+    amount: legacy.amount,
+    frequency: legacy.frequency as Expense['frequency'],
+    priority,
+    tags,
+    memo: legacy.memo,
+    createdAt: legacy.createdAt,
+    updatedAt: legacy.updatedAt,
+  };
 }
 
 // Context
@@ -62,7 +128,7 @@ interface ExpenseContextType {
   addExpense: (input: ExpenseInput) => Promise<void>;
   updateExpense: (id: string, input: Partial<ExpenseInput>) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
-  setFilter: (category: CategoryType | 'all') => void;
+  setFilter: (filter: Partial<ExpenseFilter>) => void;
   getExpenseById: (id: string) => Expense | undefined;
   filteredExpenses: Expense[];
 }
@@ -72,11 +138,13 @@ const ExpenseContext = createContext<ExpenseContextType | null>(null);
 export function ExpenseProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(expenseReducer, initialState);
 
-  // 初期ロード
+  // 初期ロード（マイグレーション付き）
   useEffect(() => {
     const init = async () => {
       try {
-        const expenses = await loadExpenses();
+        const rawExpenses = await loadExpenses();
+        // マイグレーション実行
+        const expenses = rawExpenses.map((e) => migrateExpense(e as LegacyExpense));
         dispatch({ type: 'SET_EXPENSES', payload: expenses });
       } catch {
         dispatch({ type: 'SET_ERROR', payload: 'データの読み込みに失敗しました' });
@@ -119,18 +187,26 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'DELETE_EXPENSE', payload: id });
   };
 
-  const setFilter = (category: CategoryType | 'all') => {
-    dispatch({ type: 'SET_FILTER', payload: category });
+  const setFilter = (filter: Partial<ExpenseFilter>) => {
+    dispatch({ type: 'SET_FILTER', payload: filter });
   };
 
   const getExpenseById = (id: string) => {
     return state.expenses.find((e) => e.id === id);
   };
 
-  const filteredExpenses =
-    state.filterCategory === 'all'
-      ? state.expenses
-      : state.expenses.filter((e) => e.category === state.filterCategory);
+  // フィルタリング
+  const filteredExpenses = state.expenses.filter((expense) => {
+    // 重要度フィルター
+    if (state.filter.priority !== 'all' && expense.priority !== state.filter.priority) {
+      return false;
+    }
+    // タグフィルター
+    if (state.filter.tagId !== 'all' && !expense.tags.includes(state.filter.tagId)) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <ExpenseContext.Provider

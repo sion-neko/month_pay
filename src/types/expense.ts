@@ -1,4 +1,4 @@
-import { CategoryType } from './category';
+import { PriorityType } from './priority';
 import { Frequency } from './frequency';
 
 /**
@@ -9,7 +9,8 @@ export interface Expense {
   name: string;
   amount: number;
   frequency: Frequency;
-  category: CategoryType;
+  priority: PriorityType;
+  tags: string[]; // タグIDの配列
   memo?: string;
   createdAt: string;
   updatedAt: string;
@@ -29,12 +30,22 @@ export interface ConvertedAmount {
 }
 
 /**
- * カテゴリ別集計
+ * 重要度別集計
  */
-export interface CategorySummary {
-  category: CategoryType;
+export interface PrioritySummary {
+  priority: PriorityType;
   totalMonthly: number;
   totalAnnual: number;
   count: number;
   percentage: number;
+}
+
+/**
+ * タグ別集計
+ */
+export interface TagSummary {
+  tagId: string;
+  totalMonthly: number;
+  totalAnnual: number;
+  count: number;
 }

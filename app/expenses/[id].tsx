@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import { Card, Text, Button, Divider } from 'react-native-paper';
+import { Card, Text, Button, Divider, Chip } from 'react-native-paper';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useExpenseContext } from '../../src/contexts/ExpenseContext';
-import { useCategoryContext } from '../../src/contexts/CategoryContext';
+import { useTagContext } from '../../src/contexts/TagContext';
 import { ExpenseForm } from '../../src/components';
 import { ExpenseInput } from '../../src/types/expense';
-import { PRESET_CATEGORIES } from '../../src/types/category';
+import { PRIORITIES } from '../../src/types/priority';
 import { FREQUENCY_LABELS } from '../../src/types/frequency';
 import { formatCurrency } from '../../src/utils/format';
 import { calculateConvertedAmount } from '../../src/utils/calculation';
@@ -15,7 +15,7 @@ export default function ExpenseDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getExpenseById, updateExpense, deleteExpense } = useExpenseContext();
-  const { getCategoryByType } = useCategoryContext();
+  const { getTagById } = useTagContext();
   const [isEditing, setIsEditing] = useState(false);
 
   const expense = getExpenseById(id);
@@ -28,7 +28,7 @@ export default function ExpenseDetailScreen() {
     );
   }
 
-  const category = getCategoryByType(expense.category) ?? PRESET_CATEGORIES.other;
+  const priority = PRIORITIES[expense.priority];
   const converted = calculateConvertedAmount(expense);
 
   const handleUpdate = async (data: ExpenseInput) => {
@@ -57,7 +57,8 @@ export default function ExpenseDetailScreen() {
           name: expense.name,
           amount: expense.amount,
           frequency: expense.frequency,
-          category: expense.category,
+          priority: expense.priority,
+          tags: expense.tags,
           memo: expense.memo,
         }}
         onSubmit={handleUpdate}
@@ -72,11 +73,30 @@ export default function ExpenseDetailScreen() {
       <Card style={styles.card}>
         <Card.Content>
           <View style={styles.header}>
-            <Text variant="headlineSmall">{expense.name}</Text>
-            <View style={[styles.categoryBadge, { backgroundColor: category.color }]}>
-              <Text style={styles.categoryText}>{category.label}</Text>
+            <Text variant="headlineSmall" style={styles.title}>{expense.name}</Text>
+            <View style={[styles.priorityBadge, { backgroundColor: priority.color }]}>
+              <Text style={styles.priorityText}>{priority.label}</Text>
             </View>
           </View>
+
+          {expense.tags.length > 0 && (
+            <View style={styles.tagContainer}>
+              {expense.tags.map((tagId) => {
+                const tag = getTagById(tagId);
+                if (!tag) return null;
+                return (
+                  <Chip
+                    key={tagId}
+                    style={[styles.tagChip, { backgroundColor: tag.color }]}
+                    textStyle={{ color: '#fff', fontSize: 12 }}
+                    compact
+                  >
+                    {tag.label}
+                  </Chip>
+                );
+              })}
+            </View>
+          )}
 
           <Divider style={styles.divider} />
 
@@ -157,14 +177,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
-  categoryBadge: {
+  title: {
+    flex: 1,
+  },
+  priorityBadge: {
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 16,
+    marginLeft: 8,
   },
-  categoryText: {
+  priorityText: {
     color: '#fff',
     fontWeight: 'bold',
+    fontSize: 12,
+  },
+  tagContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+    marginTop: 8,
+  },
+  tagChip: {
+    height: 26,
   },
   divider: {
     marginVertical: 16,

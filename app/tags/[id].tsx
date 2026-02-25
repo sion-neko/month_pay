@@ -2,41 +2,41 @@ import React from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useCategoryContext } from '../../src/contexts/CategoryContext';
-import { CategoryForm } from '../../src/components/category/CategoryForm';
-import { CustomCategoryInput } from '../../src/types/category';
+import { useTagContext } from '../../src/contexts/TagContext';
+import { TagForm } from '../../src/components/tag/TagForm';
+import { TagInput } from '../../src/types/tag';
 
-export default function EditCategoryScreen() {
+export default function EditTagScreen() {
   const router = useRouter();
-  const { type } = useLocalSearchParams<{ type: string }>();
-  const { getCategoryByType, updateCategory, deleteCategory } = useCategoryContext();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { getTagById, updateTag, deleteTag } = useTagContext();
 
-  const category = getCategoryByType(type ?? '');
+  const tag = getTagById(id ?? '');
 
-  if (!category) {
+  if (!tag) {
     return (
       <View style={styles.notFound}>
-        <Text>カテゴリが見つかりません</Text>
+        <Text>タグが見つかりません</Text>
       </View>
     );
   }
 
-  const handleSubmit = async (data: CustomCategoryInput) => {
-    await updateCategory(category.type, data);
+  const handleSubmit = async (data: TagInput) => {
+    await updateTag(tag.id, data);
     router.back();
   };
 
   const handleDelete = () => {
     Alert.alert(
       '削除確認',
-      `「${category.label}」を削除しますか？\nこのカテゴリを使用している固定費は「その他」に変更されます。`,
+      `「${tag.label}」を削除しますか？\nこのタグを使用している固定費からはタグが外れます。`,
       [
         { text: 'キャンセル', style: 'cancel' },
         {
           text: '削除',
           style: 'destructive',
           onPress: async () => {
-            await deleteCategory(category.type);
+            await deleteTag(tag.id);
             router.back();
           },
         },
@@ -46,11 +46,10 @@ export default function EditCategoryScreen() {
 
   return (
     <View style={styles.container}>
-      <CategoryForm
+      <TagForm
         initialValues={{
-          label: category.label,
-          icon: category.icon,
-          color: category.color,
+          label: tag.label,
+          color: tag.color,
         }}
         onSubmit={handleSubmit}
         onCancel={() => router.back()}
@@ -64,7 +63,7 @@ export default function EditCategoryScreen() {
           style={styles.deleteButton}
           icon="delete-outline"
         >
-          このカテゴリを削除
+          このタグを削除
         </Button>
       </View>
     </View>

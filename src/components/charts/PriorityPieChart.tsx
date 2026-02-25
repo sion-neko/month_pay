@@ -2,12 +2,12 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Path, G, Circle } from 'react-native-svg';
-import { CategorySummary } from '../../types/expense';
+import { PrioritySummary } from '../../types/expense';
+import { PRIORITIES } from '../../types/priority';
 import { formatCurrency } from '../../utils/format';
-import { useCategoryContext } from '../../contexts/CategoryContext';
 
 interface Props {
-  data: CategorySummary[];
+  data: PrioritySummary[];
   displayMode: 'monthly' | 'annual';
 }
 
@@ -31,9 +31,7 @@ function createArcPath(cx: number, cy: number, r: number, startAngle: number, en
   ].join(' ');
 }
 
-export function CategoryPieChart({ data, displayMode }: Props) {
-  const { getCategoryByType } = useCategoryContext();
-
+export function PriorityPieChart({ data, displayMode }: Props) {
   const filteredData = data.filter((item) =>
     displayMode === 'monthly' ? item.totalMonthly > 0 : item.totalAnnual > 0
   );
@@ -61,11 +59,11 @@ export function CategoryPieChart({ data, displayMode }: Props) {
     const value = displayMode === 'monthly' ? item.totalMonthly : item.totalAnnual;
     const sliceAngle = (value / total) * 360;
     const path = createArcPath(cx, cy, radius, currentAngle, currentAngle + sliceAngle);
-    const category = getCategoryByType(item.category);
-    const color = category?.color ?? '#C9CBCF';
-    const label = category?.label ?? 'その他';
+    const priority = PRIORITIES[item.priority];
+    const color = priority?.color ?? '#C9CBCF';
+    const label = priority?.label ?? 'その他';
     currentAngle += sliceAngle;
-    return { path, color, label, value };
+    return { path, color, label, value, percentage: item.percentage };
   });
 
   return (
@@ -86,6 +84,7 @@ export function CategoryPieChart({ data, displayMode }: Props) {
           <View key={i} style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: slice.color }]} />
             <Text variant="bodySmall" style={styles.legendLabel}>{slice.label}</Text>
+            <Text variant="bodySmall" style={styles.legendPercentage}>{slice.percentage}%</Text>
             <Text variant="bodySmall" style={styles.legendValue}>{formatCurrency(slice.value)}</Text>
           </View>
         ))}
@@ -125,7 +124,14 @@ const styles = StyleSheet.create({
   legendLabel: {
     flex: 1,
   },
+  legendPercentage: {
+    color: '#666',
+    minWidth: 32,
+    textAlign: 'right',
+  },
   legendValue: {
     color: '#666',
+    minWidth: 70,
+    textAlign: 'right',
   },
 });

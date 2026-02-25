@@ -1,12 +1,13 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Card, Text, Chip } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { Expense } from '../../types/expense';
+import { PRIORITIES } from '../../types/priority';
 import { FREQUENCY_LABELS } from '../../types/frequency';
 import { formatCurrency } from '../../utils/format';
 import { calculateConvertedAmount } from '../../utils/calculation';
-import { useCategoryContext } from '../../contexts/CategoryContext';
+import { useTagContext } from '../../contexts/TagContext';
 
 interface Props {
   expense: Expense;
@@ -14,8 +15,8 @@ interface Props {
 
 export function ExpenseCard({ expense }: Props) {
   const router = useRouter();
-  const { getCategoryByType } = useCategoryContext();
-  const category = getCategoryByType(expense.category) ?? { label: 'その他', icon: 'dots-horizontal', color: '#C9CBCF' };
+  const { getTagById } = useTagContext();
+  const priority = PRIORITIES[expense.priority];
   const converted = calculateConvertedAmount(expense);
   const isMonthly = expense.frequency.type === 'monthly';
 
@@ -26,12 +27,12 @@ export function ExpenseCard({ expense }: Props) {
         subtitle={FREQUENCY_LABELS[expense.frequency.type]}
         right={() => (
           <Chip
-            icon={category.icon}
-            style={[styles.categoryChip, { backgroundColor: category.color }]}
+            icon={priority.icon}
+            style={[styles.priorityChip, { backgroundColor: priority.color }]}
             textStyle={{ color: '#fff', fontSize: 12 }}
             compact
           >
-            {category.label}
+            {priority.label}
           </Chip>
         )}
       />
@@ -44,6 +45,24 @@ export function ExpenseCard({ expense }: Props) {
           <Text variant="bodySmall" style={styles.converted}>
             月額換算: {formatCurrency(converted.monthly)}
           </Text>
+        )}
+        {expense.tags.length > 0 && (
+          <View style={styles.tagContainer}>
+            {expense.tags.map((tagId) => {
+              const tag = getTagById(tagId);
+              if (!tag) return null;
+              return (
+                <Chip
+                  key={tagId}
+                  style={[styles.tagChip, { backgroundColor: tag.color }]}
+                  textStyle={{ color: '#fff', fontSize: 10 }}
+                  compact
+                >
+                  {tag.label}
+                </Chip>
+              );
+            })}
+          </View>
         )}
         {expense.memo && (
           <Text variant="bodySmall" style={styles.memo} numberOfLines={1}>
@@ -60,7 +79,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginVertical: 6,
   },
-  categoryChip: {
+  priorityChip: {
     marginRight: 16,
   },
   amount: {
@@ -74,6 +93,15 @@ const styles = StyleSheet.create({
   converted: {
     color: '#1976D2',
     marginTop: 4,
+  },
+  tagContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+    marginTop: 8,
+  },
+  tagChip: {
+    height: 24,
   },
   memo: {
     marginTop: 8,

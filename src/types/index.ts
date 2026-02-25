@@ -1,3 +1,4 @@
 export * from './frequency';
-export * from './category';
+export * from './priority';
+export * from './tag';
 export * from './expense';
