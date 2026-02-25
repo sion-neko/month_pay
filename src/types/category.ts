@@ -36,9 +36,18 @@ export type CustomCategoryInput = Omit<Category, 'type' | 'isCustom'>;
  * 選択可能な色
  */
 export const CATEGORY_COLORS = [
-  '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-  '#9966FF', '#FF9F40', '#C9CBCF', '#E91E63',
-  '#2196F3', '#4CAF50', '#FF5722', '#795548',
+  // 赤系
+  '#FF6384', '#E91E63', '#F44336', '#FF5722',
+  // オレンジ・黄色系
+  '#FF9F40', '#FF9800', '#FFC107', '#FFCE56',
+  // 緑系
+  '#4CAF50', '#8BC34A', '#009688', '#4BC0C0',
+  // 青系
+  '#36A2EB', '#2196F3', '#03A9F4', '#00BCD4',
+  // 紫系
+  '#9966FF', '#673AB7', '#9C27B0', '#E040FB',
+  // その他
+  '#795548', '#607D8B', '#9E9E9E', '#C9CBCF',
 ];
 
 /**

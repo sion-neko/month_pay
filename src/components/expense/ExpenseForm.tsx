@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { TextInput, Button, HelperText, Text, Chip } from 'react-native-paper';
+import { useRouter } from 'expo-router';
 import { ExpenseInput } from '../../types/expense';
 import { CategoryType } from '../../types/category';
 import { FrequencyType, FREQUENCY_OPTIONS } from '../../types/frequency';
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function ExpenseForm({ initialValues, onSubmit, onCancel, submitLabel = '保存' }: Props) {
+  const router = useRouter();
   const { allCategories } = useCategoryContext();
   const [name, setName] = useState(initialValues?.name ?? '');
   const [amount, setAmount] = useState(initialValues?.amount?.toString() ?? '');
@@ -119,6 +121,14 @@ export function ExpenseForm({ initialValues, onSubmit, onCancel, submitLabel = '
             {cat.label}
           </Chip>
         ))}
+        <Chip
+          icon="plus"
+          onPress={() => router.push('/categories/new')}
+          style={styles.addCategoryChip}
+          mode="outlined"
+        >
+          追加
+        </Chip>
       </View>
 
       <TextInput
@@ -170,6 +180,10 @@ const styles = StyleSheet.create({
   },
   chip: {
     marginBottom: 4,
+  },
+  addCategoryChip: {
+    marginBottom: 4,
+    borderStyle: 'dashed',
   },
   buttons: {
     flexDirection: 'row',
