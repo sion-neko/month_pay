@@ -53,6 +53,7 @@ export function PriorityPieChart({ data, displayMode }: Props) {
   const cx = size / 2;
   const cy = size / 2;
   const radius = size / 2 - 4;
+  const innerRadius = radius * 0.6; // ドーナツの穴のサイズ
   let currentAngle = 0;
 
   const slices = filteredData.map((item) => {
@@ -68,24 +69,44 @@ export function PriorityPieChart({ data, displayMode }: Props) {
 
   return (
     <View style={styles.container}>
-      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <G>
-          {slices.length === 1 ? (
-            <Circle cx={cx} cy={cy} r={radius} fill={slices[0].color} />
-          ) : (
-            slices.map((slice, i) => (
-              <Path key={i} d={slice.path} fill={slice.color} />
-            ))
-          )}
-        </G>
-      </Svg>
+      <View style={styles.chartWrapper}>
+        <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          <G>
+            {slices.length === 1 ? (
+              <Circle
+                cx={cx}
+                cy={cy}
+                r={radius}
+                fill={slices[0].color}
+              />
+            ) : (
+              slices.map((slice, i) => (
+                <Path
+                  key={i}
+                  d={slice.path}
+                  fill={slice.color}
+                  stroke="#FFFFFF"
+                  strokeWidth={2}
+                />
+              ))
+            )}
+            {/* ドーナツの穴 */}
+            <Circle cx={cx} cy={cy} r={innerRadius} fill="#FFFFFF" />
+          </G>
+        </Svg>
+        {/* 中心に合計金額などを表示することも可能ですが、一旦シンプルに穴だけにします */}
+      </View>
       <View style={styles.legend}>
         {slices.map((slice, i) => (
           <View key={i} style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: slice.color }]} />
-            <Text variant="bodySmall" style={styles.legendLabel}>{slice.label}</Text>
-            <Text variant="bodySmall" style={styles.legendPercentage}>{slice.percentage}%</Text>
-            <Text variant="bodySmall" style={styles.legendValue}>{formatCurrency(slice.value)}</Text>
+            <View style={styles.legendTextContainer}>
+              <Text variant="labelMedium" style={styles.legendLabel}>{slice.label}</Text>
+              <View style={styles.legendValueRow}>
+                <Text variant="bodySmall" style={styles.legendPercentage}>{slice.percentage}%</Text>
+                <Text variant="bodySmall" style={styles.legendValue}>{formatCurrency(slice.value)}</Text>
+              </View>
+            </View>
           </View>
         ))}
       </View>
@@ -98,9 +119,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 8,
+    marginVertical: 16,
     paddingHorizontal: 16,
-    gap: 16,
+    gap: 24,
+  },
+  chartWrapper: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    backgroundColor: '#fff',
+    borderRadius: 80,
   },
   empty: {
     height: 200,
@@ -109,29 +139,38 @@ const styles = StyleSheet.create({
   },
   legend: {
     flex: 1,
-    gap: 6,
+    gap: 12,
   },
   legendItem: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+    alignItems: 'flex-start',
+    gap: 8,
   },
   legendDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginTop: 4,
+  },
+  legendTextContainer: {
+    flex: 1,
   },
   legendLabel: {
-    flex: 1,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  legendValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   legendPercentage: {
     color: '#666',
-    minWidth: 32,
-    textAlign: 'right',
+    fontSize: 11,
   },
   legendValue: {
     color: '#666',
-    minWidth: 70,
-    textAlign: 'right',
+    fontSize: 11,
+    fontWeight: '500',
   },
 });

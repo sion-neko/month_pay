@@ -20,19 +20,19 @@ export const PRIORITIES: Record<PriorityType, Priority> = {
   essential: {
     type: 'essential',
     label: '必須',
-    color: '#F44336', // 赤
-    icon: 'alert-circle',
+    color: '#FF7675', // Rose
+    icon: 'shield-check',
   },
   'semi-essential': {
     type: 'semi-essential',
     label: '準必須',
-    color: '#FF9800', // オレンジ
-    icon: 'alert',
+    color: '#FACD5D', // Amber/Yellow
+    icon: 'alert-circle',
   },
   discretionary: {
     type: 'discretionary',
     label: 'ゆとり',
-    color: '#4CAF50', // 緑
+    color: '#55EFC4', // Mint
     icon: 'leaf',
   },
 };
