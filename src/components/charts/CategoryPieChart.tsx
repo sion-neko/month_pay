@@ -2,12 +2,12 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Path, G, Circle } from 'react-native-svg';
-import { TagSummary } from '../../types/expense';
+import { CategorySummary } from '../../types/expense';
 import { Tag } from '../../types/tag';
 import { formatCurrency } from '../../utils/format';
 
 interface Props {
-    data: TagSummary[];
+    data: CategorySummary[];
     allTags: Tag[];
     displayMode: 'monthly' | 'annual';
 }
@@ -32,7 +32,7 @@ function createArcPath(cx: number, cy: number, r: number, startAngle: number, en
     ].join(' ');
 }
 
-export function TagPieChart({ data, allTags, displayMode }: Props) {
+export function CategoryPieChart({ data, allTags, displayMode }: Props) {
     const filteredData = data.filter((item) =>
         displayMode === 'monthly' ? item.totalMonthly > 0 : item.totalAnnual > 0
     );
@@ -40,7 +40,7 @@ export function TagPieChart({ data, allTags, displayMode }: Props) {
     if (filteredData.length === 0) {
         return (
             <View style={styles.empty}>
-                <Text>タグデータがありません</Text>
+                <Text>カテゴリデータがありません</Text>
             </View>
         );
     }
@@ -62,13 +62,13 @@ export function TagPieChart({ data, allTags, displayMode }: Props) {
         const sliceAngle = (value / total) * 360;
         const path = createArcPath(cx, cy, radius, currentAngle, currentAngle + sliceAngle);
 
-        const tag = allTags.find(t => t.id === item.tagId);
+        const tag = allTags.find(t => t.id === item.categoryId);
         let color = tag?.color ?? '#C9CBCF';
-        let label = tag?.label ?? '不明なタグ';
+        let label = tag?.label ?? '不明なカテゴリ';
 
-        if (item.tagId === 'untagged') {
+        if (item.categoryId === 'uncategorized') {
             color = '#ABB2B9'; // 落ち着いたグレー
-            label = 'タグなし';
+            label = '未設定';
         }
 
         currentAngle += sliceAngle;

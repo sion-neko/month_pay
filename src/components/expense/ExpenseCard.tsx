@@ -46,14 +46,13 @@ export function ExpenseCard({ expense }: Props) {
             月額換算: {formatCurrency(converted.monthly)}
           </Text>
         )}
-        {expense.tags.length > 0 && (
+        {expense.categoryId && (
           <View style={styles.tagContainer}>
-            {expense.tags.map((tagId) => {
-              const tag = getTagById(tagId);
+            {(() => {
+              const tag = getTagById(expense.categoryId);
               if (!tag) return null;
               return (
                 <Chip
-                  key={tagId}
                   style={[styles.tagChip, { backgroundColor: tag.color }]}
                   textStyle={{ color: '#fff', fontSize: 10 }}
                   compact
@@ -61,7 +60,7 @@ export function ExpenseCard({ expense }: Props) {
                   {tag.label}
                 </Chip>
               );
-            })}
+            })()}
           </View>
         )}
         {expense.memo && (

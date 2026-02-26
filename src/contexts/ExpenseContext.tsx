@@ -7,7 +7,7 @@ import { generateId } from '../utils/format';
 // フィルター型
 interface ExpenseFilter {
   priority: PriorityType | 'all';
-  tagId: string | 'all';
+  categoryId: string | 'all';
 }
 
 // State
@@ -34,7 +34,7 @@ const initialState: ExpenseState = {
   error: null,
   filter: {
     priority: 'all',
-    tagId: 'all',
+    categoryId: 'all',
   },
 };
 
@@ -80,12 +80,13 @@ interface LegacyExpense {
 }
 
 function migrateExpense(legacy: LegacyExpense): Expense {
-  // 既に新形式の場合はそのまま返す
-  if (legacy.priority && legacy.tags) {
-    return legacy as Expense;
+  // 既に新形式(categoryId)の場合はそのまま返す
+  // 型チェックのためにあえて明示的にプロパティを確認
+  if ((legacy as any).categoryId) {
+    return legacy as unknown as Expense;
   }
 
-  // 旧カテゴリから重要度とタグへのマッピング
+  // 旧カテゴリから重要度と新カテゴリへのマッピング
   const categoryToPriority: Record<string, PriorityType> = {
     housing: 'essential',
     communication: 'semi-essential',
@@ -96,7 +97,7 @@ function migrateExpense(legacy: LegacyExpense): Expense {
     other: 'semi-essential',
   };
 
-  const categoryToTag: Record<string, string> = {
+  const categoryToId: Record<string, string> = {
     housing: 'housing',
     communication: 'communication',
     subscription: 'subscription',
@@ -105,9 +106,15 @@ function migrateExpense(legacy: LegacyExpense): Expense {
   };
 
   const oldCategory = legacy.category || 'other';
-  const priority = categoryToPriority[oldCategory] || 'semi-essential';
-  const tagId = categoryToTag[oldCategory];
-  const tags = tagId ? [tagId] : [];
+  const priority = legacy.priority || categoryToPriority[oldCategory] || 'semi-essential';
+
+  // 以前のtagsがあれば最初の1つをcategoryIdにする
+  let categoryId = legacy.tags && legacy.tags.length > 0 ? legacy.tags[0] : undefined;
+
+  // なければ旧カテゴリから変換
+  if (!categoryId) {
+    categoryId = categoryToId[oldCategory];
+  }
 
   return {
     id: legacy.id,
@@ -115,7 +122,7 @@ function migrateExpense(legacy: LegacyExpense): Expense {
     amount: legacy.amount,
     frequency: legacy.frequency as Expense['frequency'],
     priority,
-    tags,
+    categoryId,
     memo: legacy.memo,
     createdAt: legacy.createdAt,
     updatedAt: legacy.updatedAt,
@@ -201,8 +208,8 @@ export function ExpenseProvider({ children }: { children: ReactNode }) {
     if (state.filter.priority !== 'all' && expense.priority !== state.filter.priority) {
       return false;
     }
-    // タグフィルター
-    if (state.filter.tagId !== 'all' && !expense.tags.includes(state.filter.tagId)) {
+    // カテゴリフィルター
+    if (state.filter.categoryId !== 'all' && expense.categoryId !== state.filter.categoryId) {
       return false;
     }
     return true;

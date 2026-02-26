@@ -23,14 +23,12 @@ export function ExpenseForm({ initialValues, onSubmit, onCancel, submitLabel = '
   const [frequencyType, setFrequencyType] = useState<FrequencyType>(initialValues?.frequency?.type ?? 'monthly');
   const [customMonths, setCustomMonths] = useState(initialValues?.frequency?.customMonths?.toString() ?? '');
   const [priority, setPriority] = useState<PriorityType>(initialValues?.priority ?? 'semi-essential');
-  const [selectedTags, setSelectedTags] = useState<string[]>(initialValues?.tags ?? []);
+  const [categoryId, setCategoryId] = useState<string | undefined>(initialValues?.categoryId);
   const [memo, setMemo] = useState(initialValues?.memo ?? '');
   const [errors, setErrors] = useState<ValidationErrors>({});
 
-  const toggleTag = (tagId: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
-    );
+  const toggleCategory = (id: string) => {
+    setCategoryId((prev) => (prev === id ? undefined : id));
   };
 
   const handleSubmit = () => {
@@ -42,7 +40,7 @@ export function ExpenseForm({ initialValues, onSubmit, onCancel, submitLabel = '
         ...(frequencyType === 'custom' && { customMonths: parseInt(customMonths, 10) }),
       },
       priority,
-      tags: selectedTags,
+      categoryId,
       memo: memo.trim() || undefined,
     };
 
@@ -132,16 +130,16 @@ export function ExpenseForm({ initialValues, onSubmit, onCancel, submitLabel = '
       </View>
 
       <Text variant="titleSmall" style={styles.sectionTitle}>
-        タグ（任意）
+        カテゴリ（任意）
       </Text>
       <View style={styles.chipContainer}>
         {allTags.map((tag) => (
           <Chip
             key={tag.id}
-            selected={selectedTags.includes(tag.id)}
-            onPress={() => toggleTag(tag.id)}
-            style={[styles.chip, selectedTags.includes(tag.id) && { backgroundColor: tag.color }]}
-            textStyle={selectedTags.includes(tag.id) ? { color: '#fff' } : undefined}
+            selected={categoryId === tag.id}
+            onPress={() => toggleCategory(tag.id)}
+            style={[styles.chip, categoryId === tag.id && { backgroundColor: tag.color }]}
+            textStyle={categoryId === tag.id ? { color: '#fff' } : undefined}
             mode="outlined"
           >
             {tag.label}

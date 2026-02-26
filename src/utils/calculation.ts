@@ -1,4 +1,4 @@
-import { Expense, ConvertedAmount, PrioritySummary, TagSummary } from '../types/expense';
+import { Expense, ConvertedAmount, PrioritySummary, CategorySummary } from '../types/expense';
 import { FrequencyType, FREQUENCY_MONTHS } from '../types/frequency';
 import { PriorityType, PRIORITY_LIST } from '../types/priority';
 
@@ -64,42 +64,42 @@ export function calculatePrioritySummaries(expenses: Expense[]): PrioritySummary
 }
 
 /**
- * タグ別に集計
+ * カテゴリ別に集計
  */
-export function calculateTagSummaries(expenses: Expense[]): TagSummary[] {
-  // 使用されているタグを抽出
-  const tagIds = new Set<string>();
+export function calculateCategorySummaries(expenses: Expense[]): CategorySummary[] {
+  // 使用されているカテゴリを抽出
+  const categoryIds = new Set<string>();
   for (const expense of expenses) {
-    for (const tagId of expense.tags) {
-      tagIds.add(tagId);
+    if (expense.categoryId) {
+      categoryIds.add(expense.categoryId);
     }
   }
 
   const totals = calculateTotals(expenses);
 
-  const summaries = Array.from(tagIds).map((tagId) => {
-    const tagExpenses = expenses.filter((e) => e.tags.includes(tagId));
-    const tagTotals = calculateTotals(tagExpenses);
+  const summaries: CategorySummary[] = Array.from(categoryIds).map((categoryId) => {
+    const categoryExpenses = expenses.filter((e) => e.categoryId === categoryId);
+    const categoryTotals = calculateTotals(categoryExpenses);
 
     return {
-      tagId,
-      totalMonthly: tagTotals.monthly,
-      totalAnnual: tagTotals.annual,
-      count: tagExpenses.length,
-      percentage: totals.monthly > 0 ? Math.round((tagTotals.monthly / totals.monthly) * 100) : 0,
+      categoryId,
+      totalMonthly: categoryTotals.monthly,
+      totalAnnual: categoryTotals.annual,
+      count: categoryExpenses.length,
+      percentage: totals.monthly > 0 ? Math.round((categoryTotals.monthly / totals.monthly) * 100) : 0,
     };
   });
 
-  // タグなしの集計を追加
-  const untaggedExpenses = expenses.filter((e) => e.tags.length === 0);
-  if (untaggedExpenses.length > 0) {
-    const untaggedTotals = calculateTotals(untaggedExpenses);
+  // カテゴリなしの集計を追加
+  const uncategorizedExpenses = expenses.filter((e) => !e.categoryId);
+  if (uncategorizedExpenses.length > 0) {
+    const uncategorizedTotals = calculateTotals(uncategorizedExpenses);
     summaries.push({
-      tagId: 'untagged',
-      totalMonthly: untaggedTotals.monthly,
-      totalAnnual: untaggedTotals.annual,
-      count: untaggedExpenses.length,
-      percentage: totals.monthly > 0 ? Math.round((untaggedTotals.monthly / totals.monthly) * 100) : 0,
+      categoryId: 'uncategorized',
+      totalMonthly: uncategorizedTotals.monthly,
+      totalAnnual: uncategorizedTotals.annual,
+      count: uncategorizedExpenses.length,
+      percentage: totals.monthly > 0 ? Math.round((uncategorizedTotals.monthly / totals.monthly) * 100) : 0,
     });
   }
 

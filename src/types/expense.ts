@@ -10,7 +10,7 @@ export interface Expense {
   amount: number;
   frequency: Frequency;
   priority: PriorityType;
-  tags: string[]; // タグIDの配列
+  categoryId?: string; // カテゴリID（旧タグ）
   memo?: string;
   createdAt: string;
   updatedAt: string;
@@ -41,10 +41,10 @@ export interface PrioritySummary {
 }
 
 /**
- * タグ別集計
+ * カテゴリ別集計
  */
-export interface TagSummary {
-  tagId: string;
+export interface CategorySummary {
+  categoryId: string;
   totalMonthly: number;
   totalAnnual: number;
   count: number;

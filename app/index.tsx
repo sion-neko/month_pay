@@ -4,8 +4,8 @@ import { FAB, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useExpenseContext } from '../src/contexts/ExpenseContext';
-import { SummaryCard, PriorityPieChart, TagPieChart, ExpenseCard, PriorityFilter, TagFilter } from '../src/components';
-import { calculateTotals, calculatePrioritySummaries, calculateTagSummaries } from '../src/utils/calculation';
+import { SummaryCard, PriorityPieChart, CategoryPieChart, ExpenseCard, PriorityFilter, CategoryFilter } from '../src/components';
+import { calculateTotals, calculatePrioritySummaries, calculateCategorySummaries } from '../src/utils/calculation';
 import { useTagContext } from '../src/contexts/TagContext';
 
 export default function DashboardScreen() {
@@ -13,11 +13,11 @@ export default function DashboardScreen() {
   const { state, filteredExpenses, setFilter } = useExpenseContext();
   const { state: tagState } = useTagContext();
   const [displayMode, setDisplayMode] = useState<'monthly' | 'annual'>('monthly');
-  const [chartType, setChartType] = useState<'priority' | 'tag'>('priority');
+  const [chartType, setChartType] = useState<'priority' | 'category'>('priority');
 
   const totals = useMemo(() => calculateTotals(state.expenses), [state.expenses]);
   const prioritySummaries = useMemo(() => calculatePrioritySummaries(state.expenses), [state.expenses]);
-  const tagSummaries = useMemo(() => calculateTagSummaries(state.expenses), [state.expenses]);
+  const categorySummaries = useMemo(() => calculateCategorySummaries(state.expenses), [state.expenses]);
 
   if (state.isLoading) {
     return (
@@ -40,19 +40,19 @@ export default function DashboardScreen() {
         <>
           <View style={styles.chartHeader}>
             <Text variant="titleMedium">
-              {chartType === 'priority' ? '重要度別内訳' : 'タグ別内訳'}
+              {chartType === 'priority' ? '重要度別内訳' : 'カテゴリ別内訳'}
             </Text>
             <TouchableOpacity
-              onPress={() => setChartType(prev => prev === 'priority' ? 'tag' : 'priority')}
+              onPress={() => setChartType(prev => prev === 'priority' ? 'category' : 'priority')}
               style={styles.chartToggleButton}
             >
               <MaterialCommunityIcons
-                name={chartType === 'priority' ? 'tag-outline' : 'shield-check-outline'}
+                name={chartType === 'priority' ? 'shape-outline' : 'shield-check-outline'}
                 size={18}
                 color="#1976D2"
               />
               <Text style={styles.chartToggleText}>
-                {chartType === 'priority' ? 'タグ別へ' : '重要度別へ'}
+                {chartType === 'priority' ? 'カテゴリ別へ' : '重要度別へ'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -60,14 +60,14 @@ export default function DashboardScreen() {
           {chartType === 'priority' ? (
             <PriorityPieChart data={prioritySummaries} displayMode={displayMode} />
           ) : (
-            <TagPieChart data={tagSummaries} allTags={tagState.tags} displayMode={displayMode} />
+            <CategoryPieChart data={categorySummaries} allTags={tagState.tags} displayMode={displayMode} />
           )}
 
           <View style={styles.sectionHeader}>
             <Text variant="titleMedium">固定費一覧</Text>
             <TouchableOpacity onPress={() => router.push('/tags')} style={styles.settingsButton}>
               <MaterialCommunityIcons name="tag-multiple" size={20} color="#666" />
-              <Text style={styles.settingsText}>タグ管理</Text>
+              <Text style={styles.settingsText}>カテゴリ管理</Text>
             </TouchableOpacity>
           </View>
           <Text variant="bodySmall" style={styles.filterLabel}>重要度で絞り込み</Text>
@@ -75,10 +75,10 @@ export default function DashboardScreen() {
             selected={state.filter.priority}
             onSelect={(priority) => setFilter({ priority })}
           />
-          <Text variant="bodySmall" style={styles.filterLabel}>タグで絞り込み</Text>
-          <TagFilter
-            selected={state.filter.tagId}
-            onSelect={(tagId) => setFilter({ tagId })}
+          <Text variant="bodySmall" style={styles.filterLabel}>カテゴリで絞り込み</Text>
+          <CategoryFilter
+            selected={state.filter.categoryId}
+            onSelect={(categoryId) => setFilter({ categoryId })}
           />
         </>
       )}

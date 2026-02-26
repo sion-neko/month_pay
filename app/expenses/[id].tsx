@@ -58,7 +58,7 @@ export default function ExpenseDetailScreen() {
           amount: expense.amount,
           frequency: expense.frequency,
           priority: expense.priority,
-          tags: expense.tags,
+          categoryId: expense.categoryId,
           memo: expense.memo,
         }}
         onSubmit={handleUpdate}
@@ -79,14 +79,13 @@ export default function ExpenseDetailScreen() {
             </View>
           </View>
 
-          {expense.tags.length > 0 && (
+          {expense.categoryId && (
             <View style={styles.tagContainer}>
-              {expense.tags.map((tagId) => {
-                const tag = getTagById(tagId);
+              {(() => {
+                const tag = getTagById(expense.categoryId);
                 if (!tag) return null;
                 return (
                   <Chip
-                    key={tagId}
                     style={[styles.tagChip, { backgroundColor: tag.color }]}
                     textStyle={{ color: '#fff', fontSize: 12 }}
                     compact
@@ -94,7 +93,7 @@ export default function ExpenseDetailScreen() {
                     {tag.label}
                   </Chip>
                 );
-              })}
+              })()}
             </View>
           )}
 

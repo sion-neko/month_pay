@@ -5,10 +5,10 @@ import { useTagContext } from '../../contexts/TagContext';
 
 interface Props {
   selected: string | 'all';
-  onSelect: (tagId: string | 'all') => void;
+  onSelect: (categoryId: string | 'all') => void;
 }
 
-export function TagFilter({ selected, onSelect }: Props) {
+export function CategoryFilter({ selected, onSelect }: Props) {
   const { allTags } = useTagContext();
 
   if (allTags.length === 0) {
