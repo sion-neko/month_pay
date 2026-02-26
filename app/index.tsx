@@ -6,12 +6,12 @@ import { useRouter } from 'expo-router';
 import { useExpenseContext } from '../src/contexts/ExpenseContext';
 import { SummaryCard, PriorityPieChart, CategoryPieChart, ExpenseCard, PriorityFilter, CategoryFilter } from '../src/components';
 import { calculateTotals, calculatePrioritySummaries, calculateCategorySummaries } from '../src/utils/calculation';
-import { useTagContext } from '../src/contexts/TagContext';
+import { useCategoryContext } from '../src/contexts/CategoryContext';
 
 export default function DashboardScreen() {
   const router = useRouter();
   const { state, filteredExpenses, setFilter } = useExpenseContext();
-  const { state: tagState } = useTagContext();
+  const { state: categoryState } = useCategoryContext();
   const [displayMode, setDisplayMode] = useState<'monthly' | 'annual'>('monthly');
   const [chartType, setChartType] = useState<'priority' | 'category'>('priority');
 
@@ -60,12 +60,12 @@ export default function DashboardScreen() {
           {chartType === 'priority' ? (
             <PriorityPieChart data={prioritySummaries} displayMode={displayMode} />
           ) : (
-            <CategoryPieChart data={categorySummaries} allTags={tagState.tags} displayMode={displayMode} />
+            <CategoryPieChart data={categorySummaries} allCategories={categoryState.categories} displayMode={displayMode} />
           )}
 
           <View style={styles.sectionHeader}>
             <Text variant="titleMedium">固定費一覧</Text>
-            <TouchableOpacity onPress={() => router.push('/tags')} style={styles.settingsButton}>
+            <TouchableOpacity onPress={() => router.push('/categories')} style={styles.settingsButton}>
               <MaterialCommunityIcons name="tag-multiple" size={20} color="#666" />
               <Text style={styles.settingsText}>カテゴリ管理</Text>
             </TouchableOpacity>

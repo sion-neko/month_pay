@@ -6,7 +6,7 @@ import { ExpenseInput } from '../../types/expense';
 import { PriorityType, PRIORITY_LIST } from '../../types/priority';
 import { FrequencyType, FREQUENCY_OPTIONS } from '../../types/frequency';
 import { validateExpenseInput, hasErrors, ValidationErrors } from '../../utils/validation';
-import { useTagContext } from '../../contexts/TagContext';
+import { useCategoryContext } from '../../contexts/CategoryContext';
 
 interface Props {
   initialValues?: Partial<ExpenseInput>;
@@ -17,7 +17,7 @@ interface Props {
 
 export function ExpenseForm({ initialValues, onSubmit, onCancel, submitLabel = '保存' }: Props) {
   const router = useRouter();
-  const { allTags } = useTagContext();
+  const { allCategories } = useCategoryContext();
   const [name, setName] = useState(initialValues?.name ?? '');
   const [amount, setAmount] = useState(initialValues?.amount?.toString() ?? '');
   const [frequencyType, setFrequencyType] = useState<FrequencyType>(initialValues?.frequency?.type ?? 'monthly');
@@ -133,21 +133,21 @@ export function ExpenseForm({ initialValues, onSubmit, onCancel, submitLabel = '
         カテゴリ（任意）
       </Text>
       <View style={styles.chipContainer}>
-        {allTags.map((tag) => (
+        {allCategories.map((category) => (
           <Chip
-            key={tag.id}
-            selected={categoryId === tag.id}
-            onPress={() => toggleCategory(tag.id)}
-            style={[styles.chip, categoryId === tag.id && { backgroundColor: tag.color }]}
-            textStyle={categoryId === tag.id ? { color: '#fff' } : undefined}
+            key={category.id}
+            selected={categoryId === category.id}
+            onPress={() => toggleCategory(category.id)}
+            style={[styles.chip, categoryId === category.id && { backgroundColor: category.color }]}
+            textStyle={categoryId === category.id ? { color: '#fff' } : undefined}
             mode="outlined"
           >
-            {tag.label}
+            {category.label}
           </Chip>
         ))}
         <Chip
           icon="plus"
-          onPress={() => router.push('/tags/new')}
+          onPress={() => router.push('/categories/new')}
           style={styles.addChip}
           mode="outlined"
         >

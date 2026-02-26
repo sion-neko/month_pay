@@ -3,12 +3,12 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Path, G, Circle } from 'react-native-svg';
 import { CategorySummary } from '../../types/expense';
-import { Tag } from '../../types/tag';
+import { Category } from '../../types/category';
 import { formatCurrency } from '../../utils/format';
 
 interface Props {
     data: CategorySummary[];
-    allTags: Tag[];
+    allCategories: Category[];
     displayMode: 'monthly' | 'annual';
 }
 
@@ -32,7 +32,7 @@ function createArcPath(cx: number, cy: number, r: number, startAngle: number, en
     ].join(' ');
 }
 
-export function CategoryPieChart({ data, allTags, displayMode }: Props) {
+export function CategoryPieChart({ data, allCategories, displayMode }: Props) {
     const filteredData = data.filter((item) =>
         displayMode === 'monthly' ? item.totalMonthly > 0 : item.totalAnnual > 0
     );
@@ -62,9 +62,9 @@ export function CategoryPieChart({ data, allTags, displayMode }: Props) {
         const sliceAngle = (value / total) * 360;
         const path = createArcPath(cx, cy, radius, currentAngle, currentAngle + sliceAngle);
 
-        const tag = allTags.find(t => t.id === item.categoryId);
-        let color = tag?.color ?? '#C9CBCF';
-        let label = tag?.label ?? '不明なカテゴリ';
+        const category = allCategories.find(t => t.id === item.categoryId);
+        let color = category?.color ?? '#C9CBCF';
+        let label = category?.label ?? '不明なカテゴリ';
 
         if (item.categoryId === 'uncategorized') {
             color = '#ABB2B9'; // 落ち着いたグレー

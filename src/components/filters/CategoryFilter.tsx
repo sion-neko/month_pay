@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
 import { Chip } from 'react-native-paper';
-import { useTagContext } from '../../contexts/TagContext';
+import { useCategoryContext } from '../../contexts/CategoryContext';
 
 interface Props {
   selected: string | 'all';
@@ -9,9 +9,9 @@ interface Props {
 }
 
 export function CategoryFilter({ selected, onSelect }: Props) {
-  const { allTags } = useTagContext();
+  const { allCategories } = useCategoryContext();
 
-  if (allTags.length === 0) {
+  if (allCategories.length === 0) {
     return null;
   }
 
@@ -30,16 +30,16 @@ export function CategoryFilter({ selected, onSelect }: Props) {
       >
         すべて
       </Chip>
-      {allTags.map((tag) => (
+      {allCategories.map((category) => (
         <Chip
-          key={tag.id}
-          selected={selected === tag.id}
-          onPress={() => onSelect(tag.id)}
-          style={[styles.chip, selected === tag.id && { backgroundColor: tag.color }]}
-          textStyle={selected === tag.id ? { color: '#fff' } : undefined}
+          key={category.id}
+          selected={selected === category.id}
+          onPress={() => onSelect(category.id)}
+          style={[styles.chip, selected === category.id && { backgroundColor: category.color }]}
+          textStyle={selected === category.id ? { color: '#fff' } : undefined}
           mode="outlined"
         >
-          {tag.label}
+          {category.label}
         </Chip>
       ))}
     </ScrollView>

@@ -2,42 +2,42 @@ import React from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
 import { FAB, Text, Card } from 'react-native-paper';
 import { useRouter } from 'expo-router';
-import { useTagContext } from '../../src/contexts/TagContext';
-import { Tag } from '../../src/types/tag';
+import { useCategoryContext } from '../../src/contexts/CategoryContext';
+import { Category } from '../../src/types/category';
 
-interface TagCardProps {
-  tag: Tag;
+interface CategoryCardProps {
+  category: Category;
   onPress: () => void;
 }
 
-function TagCard({ tag, onPress }: TagCardProps) {
+function CategoryCard({ category, onPress }: CategoryCardProps) {
   return (
     <Card style={styles.card} onPress={onPress}>
       <Card.Content style={styles.cardContent}>
-        <View style={[styles.colorDot, { backgroundColor: tag.color }]} />
-        <Text variant="titleMedium">{tag.label}</Text>
+        <View style={[styles.colorDot, { backgroundColor: category.color }]} />
+        <Text variant="titleMedium">{category.label}</Text>
       </Card.Content>
     </Card>
   );
 }
 
-export default function TagListScreen() {
+export default function CategoryListScreen() {
   const router = useRouter();
-  const { allTags } = useTagContext();
+  const { allCategories } = useCategoryContext();
 
   const ListHeader = () => (
     <Text variant="titleMedium" style={styles.sectionTitle}>
-      タグ一覧
+      カテゴリ一覧
     </Text>
   );
 
   const EmptyList = () => (
     <View style={styles.emptyState}>
       <Text variant="bodyLarge" style={styles.emptyText}>
-        タグがありません
+        カテゴリがありません
       </Text>
       <Text variant="bodySmall" style={styles.emptySubText}>
-        右下の＋ボタンからタグを追加してください
+        右下の＋ボタンからカテゴリを追加してください
       </Text>
     </View>
   );
@@ -45,12 +45,12 @@ export default function TagListScreen() {
   return (
     <View style={styles.container}>
       <FlatList
-        data={allTags}
+        data={allCategories}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TagCard
-            tag={item}
-            onPress={() => router.push(`/tags/${item.id}`)}
+          <CategoryCard
+            category={item}
+            onPress={() => router.push(`/categories/${item.id}`)}
           />
         )}
         ListHeaderComponent={ListHeader}
@@ -60,7 +60,7 @@ export default function TagListScreen() {
       <FAB
         icon="plus"
         style={styles.fab}
-        onPress={() => router.push('/tags/new')}
+        onPress={() => router.push('/categories/new')}
       />
     </View>
   );

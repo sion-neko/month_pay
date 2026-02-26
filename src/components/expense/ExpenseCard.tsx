@@ -7,7 +7,7 @@ import { PRIORITIES } from '../../types/priority';
 import { FREQUENCY_LABELS } from '../../types/frequency';
 import { formatCurrency } from '../../utils/format';
 import { calculateConvertedAmount } from '../../utils/calculation';
-import { useTagContext } from '../../contexts/TagContext';
+import { useCategoryContext } from '../../contexts/CategoryContext';
 
 interface Props {
   expense: Expense;
@@ -15,7 +15,7 @@ interface Props {
 
 export function ExpenseCard({ expense }: Props) {
   const router = useRouter();
-  const { getTagById } = useTagContext();
+  const { getCategoryById } = useCategoryContext();
   const priority = PRIORITIES[expense.priority];
   const converted = calculateConvertedAmount(expense);
   const isMonthly = expense.frequency.type === 'monthly';
@@ -49,15 +49,15 @@ export function ExpenseCard({ expense }: Props) {
         {expense.categoryId && (
           <View style={styles.tagContainer}>
             {(() => {
-              const tag = getTagById(expense.categoryId);
-              if (!tag) return null;
+              const category = getCategoryById(expense.categoryId!);
+              if (!category) return null;
               return (
                 <Chip
-                  style={[styles.tagChip, { backgroundColor: tag.color }]}
+                  style={[styles.tagChip, { backgroundColor: category.color }]}
                   textStyle={{ color: '#fff', fontSize: 10 }}
                   compact
                 >
-                  {tag.label}
+                  {category.label}
                 </Chip>
               );
             })()}

@@ -2,23 +2,23 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { TagInput, TAG_COLORS } from '../../types/tag';
+import { CategoryInput, CATEGORY_COLORS } from '../../types/category';
 
 interface Props {
-  initialValues?: Partial<TagInput>;
-  onSubmit: (data: TagInput) => void;
+  initialValues?: Partial<CategoryInput>;
+  onSubmit: (data: CategoryInput) => void;
   onCancel?: () => void;
   submitLabel?: string;
 }
 
-export function TagForm({ initialValues, onSubmit, onCancel, submitLabel = '保存' }: Props) {
+export function CategoryForm({ initialValues, onSubmit, onCancel, submitLabel = '保存' }: Props) {
   const [label, setLabel] = useState(initialValues?.label ?? '');
-  const [color, setColor] = useState(initialValues?.color ?? TAG_COLORS[0]);
+  const [color, setColor] = useState(initialValues?.color ?? CATEGORY_COLORS[0]);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = () => {
     if (!label.trim()) {
-      setError('タグ名を入力してください');
+      setError('カテゴリ名を入力してください');
       return;
     }
 
@@ -31,7 +31,7 @@ export function TagForm({ initialValues, onSubmit, onCancel, submitLabel = '保�
   return (
     <ScrollView style={styles.container}>
       <TextInput
-        label="タグ名"
+        label="カテゴリ名"
         value={label}
         onChangeText={(text) => {
           setLabel(text);
@@ -47,7 +47,7 @@ export function TagForm({ initialValues, onSubmit, onCancel, submitLabel = '保�
         色を選択
       </Text>
       <View style={styles.colorGrid}>
-        {TAG_COLORS.map((c) => (
+        {CATEGORY_COLORS.map((c) => (
           <TouchableOpacity
             key={c}
             style={[
@@ -67,7 +67,7 @@ export function TagForm({ initialValues, onSubmit, onCancel, submitLabel = '保�
       <View style={styles.preview}>
         <Text variant="bodySmall" style={styles.previewLabel}>プレビュー</Text>
         <View style={[styles.previewBadge, { backgroundColor: color }]}>
-          <Text style={styles.previewText}>{label || 'タグ名'}</Text>
+          <Text style={styles.previewText}>{label || 'カテゴリ名'}</Text>
         </View>
       </View>
 
