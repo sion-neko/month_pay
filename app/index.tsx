@@ -4,16 +4,20 @@ import { FAB, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useExpenseContext } from '../src/contexts/ExpenseContext';
-import { SummaryCard, PriorityPieChart, ExpenseCard, PriorityFilter, TagFilter } from '../src/components';
-import { calculateTotals, calculatePrioritySummaries } from '../src/utils/calculation';
+import { SummaryCard, PriorityPieChart, TagPieChart, ExpenseCard, PriorityFilter, TagFilter } from '../src/components';
+import { calculateTotals, calculatePrioritySummaries, calculateTagSummaries } from '../src/utils/calculation';
+import { useTagContext } from '../src/contexts/TagContext';
 
 export default function DashboardScreen() {
   const router = useRouter();
   const { state, filteredExpenses, setFilter } = useExpenseContext();
+  const { state: tagState } = useTagContext();
   const [displayMode, setDisplayMode] = useState<'monthly' | 'annual'>('monthly');
+  const [chartType, setChartType] = useState<'priority' | 'tag'>('priority');
 
   const totals = useMemo(() => calculateTotals(state.expenses), [state.expenses]);
   const prioritySummaries = useMemo(() => calculatePrioritySummaries(state.expenses), [state.expenses]);
+  const tagSummaries = useMemo(() => calculateTagSummaries(state.expenses), [state.expenses]);
 
   if (state.isLoading) {
     return (
@@ -34,10 +38,30 @@ export default function DashboardScreen() {
 
       {state.expenses.length > 0 && (
         <>
-          <Text variant="titleMedium" style={styles.sectionTitle}>
-            重要度別内訳
-          </Text>
-          <PriorityPieChart data={prioritySummaries} displayMode={displayMode} />
+          <View style={styles.chartHeader}>
+            <Text variant="titleMedium">
+              {chartType === 'priority' ? '重要度別内訳' : 'タグ別内訳'}
+            </Text>
+            <TouchableOpacity
+              onPress={() => setChartType(prev => prev === 'priority' ? 'tag' : 'priority')}
+              style={styles.chartToggleButton}
+            >
+              <MaterialCommunityIcons
+                name={chartType === 'priority' ? 'tag-outline' : 'shield-check-outline'}
+                size={18}
+                color="#1976D2"
+              />
+              <Text style={styles.chartToggleText}>
+                {chartType === 'priority' ? 'タグ別へ' : '重要度別へ'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {chartType === 'priority' ? (
+            <PriorityPieChart data={prioritySummaries} displayMode={displayMode} />
+          ) : (
+            <TagPieChart data={tagSummaries} allTags={tagState.tags} displayMode={displayMode} />
+          )}
 
           <View style={styles.sectionHeader}>
             <Text variant="titleMedium">固定費一覧</Text>
@@ -108,6 +132,28 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 8,
+  },
+  chartHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  chartToggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#E3F2FD',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 16,
+  },
+  chartToggleText: {
+    color: '#1976D2',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   emptyState: {
     padding: 32,

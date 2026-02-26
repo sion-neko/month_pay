@@ -48,4 +48,5 @@ export interface TagSummary {
   totalMonthly: number;
   totalAnnual: number;
   count: number;
+  percentage: number;
 }

@@ -75,7 +75,9 @@ export function calculateTagSummaries(expenses: Expense[]): TagSummary[] {
     }
   }
 
-  return Array.from(tagIds).map((tagId) => {
+  const totals = calculateTotals(expenses);
+
+  const summaries = Array.from(tagIds).map((tagId) => {
     const tagExpenses = expenses.filter((e) => e.tags.includes(tagId));
     const tagTotals = calculateTotals(tagExpenses);
 
@@ -84,6 +86,22 @@ export function calculateTagSummaries(expenses: Expense[]): TagSummary[] {
       totalMonthly: tagTotals.monthly,
       totalAnnual: tagTotals.annual,
       count: tagExpenses.length,
+      percentage: totals.monthly > 0 ? Math.round((tagTotals.monthly / totals.monthly) * 100) : 0,
     };
   });
+
+  // タグなしの集計を追加
+  const untaggedExpenses = expenses.filter((e) => e.tags.length === 0);
+  if (untaggedExpenses.length > 0) {
+    const untaggedTotals = calculateTotals(untaggedExpenses);
+    summaries.push({
+      tagId: 'untagged',
+      totalMonthly: untaggedTotals.monthly,
+      totalAnnual: untaggedTotals.annual,
+      count: untaggedExpenses.length,
+      percentage: totals.monthly > 0 ? Math.round((untaggedTotals.monthly / totals.monthly) * 100) : 0,
+    });
+  }
+
+  return summaries;
 }
