@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   tagChip: {
-    height: 24,
+    // height制約なし - テキストに合わせる
   },
   memo: {
     marginTop: 8,

@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   tagChip: {
-    height: 26,
+    // height制約なし - テキストに合わせる
   },
   divider: {
     marginVertical: 16,
